@@ -7,7 +7,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'yourSecretKey', // 在实际应用中,应该使用环境变量
+      secretOrKey: 'yourSecretKey',
     });
   }
   async validate(payload: any) {
