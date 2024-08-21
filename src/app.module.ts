@@ -7,6 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { databaseConfig } from './config/database.config';
 
 @Module({
   imports: [
@@ -23,6 +25,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    TypeOrmModule.forRoot(databaseConfig),
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, AuthService, JwtStrategy],
