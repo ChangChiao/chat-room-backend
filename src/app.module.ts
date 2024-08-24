@@ -9,6 +9,7 @@ import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database.config';
+import { GoogleStrategy } from './auth/google.strategy';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { databaseConfig } from './config/database.config';
     TypeOrmModule.forRoot(databaseConfig),
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, JwtStrategy],
+  providers: [AppService, AuthService, JwtStrategy, GoogleStrategy],
 })
 export class AppModule {}
