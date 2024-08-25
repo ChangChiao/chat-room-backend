@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database.config';
 import { GoogleStrategy } from './auth/google.strategy';
+import { WebsocketGateway } from './websocket/websocket.gateway';
 
 @Module({
   imports: [
@@ -29,6 +30,12 @@ import { GoogleStrategy } from './auth/google.strategy';
     TypeOrmModule.forRoot(databaseConfig),
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService, AuthService, JwtStrategy, GoogleStrategy],
+  providers: [
+    AppService,
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    WebsocketGateway,
+  ],
 })
 export class AppModule {}
