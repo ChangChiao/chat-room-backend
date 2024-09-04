@@ -8,7 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseConfig } from './config/database.config';
+import DatabaseConfiguration from './config/database.config';
 import { GoogleStrategy } from './auth/google.strategy';
 import { WebsocketGateway } from './websocket/websocket.gateway';
 
@@ -27,7 +27,11 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
         },
       }),
     }),
-    TypeOrmModule.forRoot(databaseConfig),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: DatabaseConfiguration,
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AppController, AuthController],
   providers: [

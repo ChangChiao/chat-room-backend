@@ -8,9 +8,9 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column()
   googleId: string;
 
-  @Column({ nullable: true })
+  @Column()
   googleEmail: string;
 }
