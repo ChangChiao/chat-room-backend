@@ -4,8 +4,11 @@ import {
   PrimaryGeneratedColumn,
   Timestamp,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Message } from './message.entity';
+import { Room } from './room.entity';
 
 @Entity()
 export class User {
@@ -32,4 +35,8 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
+
+  @ManyToMany(() => Room, (room) => room.roomMembers)
+  @JoinTable()
+  rooms: Room[];
 }

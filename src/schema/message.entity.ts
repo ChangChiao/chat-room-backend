@@ -5,8 +5,8 @@ import {
   ManyToOne,
   Timestamp,
 } from 'typeorm';
-import { Room } from './Room';
-import { User } from './User';
+import { Room } from './room.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Message {

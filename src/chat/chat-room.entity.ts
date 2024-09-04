@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
-import { User } from '../user/user.entity';
+import { User } from '../schema/user.entity';
 
 @Entity()
 export class ChatRoom {

@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import DatabaseConfiguration from './config/database.config';
 import { GoogleStrategy } from './auth/google.strategy';
 import { WebsocketGateway } from './websocket/websocket.gateway';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
       useFactory: DatabaseConfiguration,
       inject: [ConfigService],
     }),
+    UsersModule,
   ],
   controllers: [AppController, AuthController],
   providers: [
