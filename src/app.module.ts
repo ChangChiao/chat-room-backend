@@ -14,6 +14,7 @@ import { WebsocketGateway } from './websocket/websocket.gateway';
 import { UsersModule } from './users/users.module';
 import { UserController } from './users/users.controller';
 import { UsersService } from './users/users.service';
+import { User } from './schema/user.entity';
 
 @Module({
   imports: [
@@ -37,11 +38,10 @@ import { UsersService } from './users/users.service';
     }),
     UsersModule,
   ],
-  controllers: [AppController, AuthController, UserController],
+  controllers: [AppController, AuthController],
   providers: [
     AppService,
     AuthService,
-    UsersService,
     JwtStrategy,
     GoogleStrategy,
     WebsocketGateway,

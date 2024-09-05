@@ -23,8 +23,18 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  create(payload: Partial<User> & { confirmPassword: string }): Promise<any> {
-    const { username, password, confirmPassword } = payload;
+  async create(
+    payload: Partial<User> & { confirmPassword: string },
+  ): Promise<any> {
+    const { username, password, confirmPassword, email } = payload;
+    if (!username || !password || !confirmPassword || !email) {
+      return {
+        code: 400,
+        message:
+          'Missing required fields: username, password, confirmPassword, email',
+      };
+    }
+
     if (password !== confirmPassword) {
       return {
         code: 400,
@@ -38,13 +48,17 @@ export class UsersService {
         message: 'Username already exists',
       };
     }
+    const salt = this.generateSalt();
+    const hashedPassword = this.hashPassword(password, salt);
+    payload.password = hashedPassword;
+    payload.salt = salt;
     try {
-      const salt = this.generateSalt();
-      const hashedPassword = this.hashPassword(password, salt);
-      payload.password = hashedPassword;
-      payload.salt = salt;
       const newUser = this.usersRepository.create(payload);
-      return this.usersRepository.save(newUser);
+      await this.usersRepository.save(newUser);
+      return {
+        code: 201,
+        msg: 'User created successfully',
+      };
     } catch (error) {
       return {
         code: 500,
