@@ -30,6 +30,9 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true })
   googleEmail: string;
 
+  @Column({ type: 'varchar', length: 255 })
+  salt: string;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Timestamp;
 
