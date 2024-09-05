@@ -8,3 +8,4 @@
 - jwt
 - typeorm
 - PostgreSQL
+- crypto
