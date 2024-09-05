@@ -12,6 +12,8 @@ import DatabaseConfiguration from './config/database.config';
 import { GoogleStrategy } from './auth/google.strategy';
 import { WebsocketGateway } from './websocket/websocket.gateway';
 import { UsersModule } from './users/users.module';
+import { UserController } from './users/users.controller';
+import { UsersService } from './users/users.service';
 
 @Module({
   imports: [
@@ -35,10 +37,11 @@ import { UsersModule } from './users/users.module';
     }),
     UsersModule,
   ],
-  controllers: [AppController, AuthController],
+  controllers: [AppController, AuthController, UserController],
   providers: [
     AppService,
     AuthService,
+    UsersService,
     JwtStrategy,
     GoogleStrategy,
     WebsocketGateway,
