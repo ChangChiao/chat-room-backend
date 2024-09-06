@@ -49,20 +49,19 @@ export class UsersService {
       username: payload.username,
       email: payload.email,
       password: hashedPassword,
-      createdAt: new Date().getTime(),
+      createdAt: new Date(),
       salt,
     };
     payload.password = hashedPassword;
     try {
-      console.log('UserPayload', UserPayload);
       const newUser = this.usersRepository.create(UserPayload);
-      console.log('newUser', newUser);
       await this.usersRepository.save(newUser);
       return {
         code: 201,
         msg: 'User created successfully',
       };
     } catch (error) {
+      console.log('error', error);
       return {
         code: 500,
         message: 'Internal server error',
