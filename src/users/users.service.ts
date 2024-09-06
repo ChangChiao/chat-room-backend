@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import { CreateUserDto } from './create-user.dto';
 import { validate } from 'class-validator';
+import { emit } from 'process';
 
 @Injectable()
 export class UsersService {
@@ -27,15 +28,6 @@ export class UsersService {
 
   async create(payload: CreateUserDto): Promise<any> {
     const { username, password, confirmPassword } = payload;
-    const errors = await validate(payload);
-    console.log('errors', errors);
-    if (errors.length > 0) {
-      return {
-        code: 400,
-        message: 'Validation failed',
-        errors: errors.map((err) => Object.values(err.constraints)).flat(),
-      };
-    }
 
     if (password !== confirmPassword) {
       return {
@@ -43,7 +35,8 @@ export class UsersService {
         message: 'Password and confirm password do not match',
       };
     }
-    const user = this.usersRepository.findOneBy({ username });
+    const user = await this.usersRepository.findOneBy({ username });
+    console.log('user', user);
     if (user) {
       return {
         code: 400,
@@ -52,10 +45,18 @@ export class UsersService {
     }
     const salt = this.generateSalt();
     const hashedPassword = this.hashPassword(password, salt);
-    const UserPayload = { ...payload, password: hashedPassword, salt };
+    const UserPayload = {
+      username: payload.username,
+      email: payload.email,
+      password: hashedPassword,
+      createdAt: new Date().getTime(),
+      salt,
+    };
     payload.password = hashedPassword;
     try {
+      console.log('UserPayload', UserPayload);
       const newUser = this.usersRepository.create(UserPayload);
+      console.log('newUser', newUser);
       await this.usersRepository.save(newUser);
       return {
         code: 201,
