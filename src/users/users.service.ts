@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/schema/user.entity';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
+import { CreateUserDto } from './create-user.dto';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -23,15 +25,15 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  async create(
-    payload: Partial<User> & { confirmPassword: string },
-  ): Promise<any> {
-    const { username, password, confirmPassword, email } = payload;
-    if (!username || !password || !confirmPassword || !email) {
+  async create(payload: CreateUserDto): Promise<any> {
+    const { username, password, confirmPassword } = payload;
+    const errors = await validate(payload);
+    console.log('errors', errors);
+    if (errors.length > 0) {
       return {
         code: 400,
-        message:
-          'Missing required fields: username, password, confirmPassword, email',
+        message: 'Validation failed',
+        errors: errors.map((err) => Object.values(err.constraints)).flat(),
       };
     }
 
@@ -50,10 +52,10 @@ export class UsersService {
     }
     const salt = this.generateSalt();
     const hashedPassword = this.hashPassword(password, salt);
+    const UserPayload = { ...payload, password: hashedPassword, salt };
     payload.password = hashedPassword;
-    payload.salt = salt;
     try {
-      const newUser = this.usersRepository.create(payload);
+      const newUser = this.usersRepository.create(UserPayload);
       await this.usersRepository.save(newUser);
       return {
         code: 201,
