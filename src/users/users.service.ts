@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/schema/user.entity';
 import { Repository } from 'typeorm';
@@ -33,19 +37,6 @@ export class UsersService {
   async create(payload: CreateUserDto): Promise<any> {
     const { username, password, confirmPassword, email } = payload;
 
-    if (password !== confirmPassword) {
-      return {
-        code: 400,
-        message: 'Password and confirm password do not match',
-      };
-    }
-    const existEmail = await this.usersRepository.findOneBy({ email });
-    if (existEmail) {
-      return {
-        code: 400,
-        message: 'email already registered',
-      };
-    }
     const salt = this.generateSalt();
     const hashedPassword = this.hashPassword(password, salt);
     const UserPayload = {
@@ -59,32 +50,18 @@ export class UsersService {
     this.createUser(UserPayload);
   }
 
-  async createWithGoogle(payload: GoogleUserPayload): Promise<any> {
+  async createUser(payload: any): Promise<any> {
     const { email } = payload;
     const existEmail = await this.usersRepository.findOneBy({ email });
     if (existEmail) {
-      return {
-        code: 400,
-        message: 'email already registered',
-      };
+      throw new ConflictException('email already exists');
     }
-    this.createUser(payload);
-  }
-
-  async createUser(payload: any): Promise<any> {
     try {
       const newUser = this.usersRepository.create(payload);
-      await this.usersRepository.save(newUser);
-      return {
-        code: 201,
-        msg: 'User created successfully',
-      };
+      return await this.usersRepository.save(newUser);
     } catch (error) {
       console.log('error', error);
-      return {
-        code: 500,
-        message: 'Internal server error',
-      };
+      throw new InternalServerErrorException('server error');
     }
   }
 

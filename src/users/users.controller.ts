@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  ConflictException,
+  HttpException,
+} from '@nestjs/common';
 import { User } from 'src/schema/user.entity';
 import { UsersService } from './users.service';
 import { UserPayload } from 'src/model';
@@ -18,8 +29,33 @@ export class UserController {
   }
 
   @Post()
+  @HttpCode(201)
   async create(@Body() user: CreateUserDto): Promise<User> {
-    return await this.userService.create(user);
+    try {
+      const result = await this.userService.createUser(user);
+      return {
+        code: 201,
+        message: '用户创建成功',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new HttpException(
+          {
+            code: 409,
+            message: error.message,
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+      throw new HttpException(
+        {
+          code: 500,
+          message: 'server error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Delete(':id')
