@@ -30,13 +30,16 @@ export class UserController {
 
   @Post()
   @HttpCode(201)
-  async create(@Body() user: CreateUserDto): Promise<User> {
+  async create(@Body() user: CreateUserDto): Promise<any> {
     try {
-      const result = await this.userService.createUser(user);
+      const result = await this.userService.create(user);
       return {
         code: 201,
-        message: '用户创建成功',
-        data: result,
+        message: 'User created successfully',
+        data: {
+          username: result.username,
+          email: result.email,
+        },
       };
     } catch (error) {
       if (error instanceof ConflictException) {

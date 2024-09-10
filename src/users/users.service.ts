@@ -47,7 +47,7 @@ export class UsersService {
       salt,
     };
     payload.password = hashedPassword;
-    this.createUser(UserPayload);
+    return this.createUser(UserPayload);
   }
 
   async createUser(payload: any): Promise<any> {
