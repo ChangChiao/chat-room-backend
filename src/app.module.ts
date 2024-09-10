@@ -12,9 +12,7 @@ import DatabaseConfiguration from './config/database.config';
 import { GoogleStrategy } from './auth/google.strategy';
 import { WebsocketGateway } from './websocket/websocket.gateway';
 import { UsersModule } from './users/users.module';
-import { UserController } from './users/users.controller';
 import { UsersService } from './users/users.service';
-import { User } from './schema/user.entity';
 
 @Module({
   imports: [

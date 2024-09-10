@@ -4,3 +4,8 @@ export interface UserPayload {
   confirmPassword: string;
   email: string;
 }
+
+export interface GoogleUserPayload {
+  username: string;
+  email: string;
+}
