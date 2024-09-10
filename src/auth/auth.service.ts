@@ -1,17 +1,36 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/schema/user.entity';
+import { UsersService } from 'src/users/users.service';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
-  login(username: string, password: string) {
-    const payload = { username: username, password: password };
+  constructor(
+    private jwtService: JwtService,
+    private userService: UsersService,
+  ) {}
+
+  async validateGoogleUser(email: string) {
+    let user = await this.userService.findByEmail(email);
+    if (!user) {
+      user = await this.userService.createWithGoogle({
+        email,
+        username: email,
+      });
+    }
+    return this.login(user);
+  }
+
+  async login(user: any) {
+    const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
     };
-  }
-
-  logout(username: string): string {
-    return `${username} login out`;
   }
 }
