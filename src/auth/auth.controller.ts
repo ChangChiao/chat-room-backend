@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -12,7 +20,12 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
-    return this.authService.validateGoogleUser(req.user.email);
+  googleAuthRedirect(@Req() req, @Res() res) {
+    const user = this.authService.validateGoogleUser(req.user.email);
+    if (user) {
+      res.redirect('http://localhost:3000/chat-list');
+    } else {
+      res.redirect('http://localhost:3000/auth-failure');
+    }
   }
 }
