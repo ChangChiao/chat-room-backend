@@ -20,12 +20,17 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req, @Res() res) {
-    const user = this.authService.validateGoogleUser(req.user.email);
-    if (user) {
-      res.redirect('http://localhost:3000/chat-list');
-    } else {
-      res.redirect('http://localhost:3000/auth-failure');
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    try {
+      const user = await this.authService.validateGoogleUser(req.user.email);
+      if (user) {
+        return res.redirect('http://localhost:3000/chat-list');
+      } else {
+        return res.redirect('http://localhost:3000/auth-failure');
+      }
+    } catch (error) {
+      console.error('Google auth error:', error);
+      return res.redirect('http://localhost:3000/auth-failure');
     }
   }
 }
