@@ -24,13 +24,13 @@ export class AuthController {
     try {
       const user = await this.authService.validateGoogleUser(req.user.email);
       if (user) {
-        return res.redirect('http://localhost:3000/chat-list');
+        return res.redirect('http://localhost:5000/chat-list');
       } else {
-        return res.redirect('http://localhost:3000/auth-failure');
+        return res.redirect('http://localhost:5000/auth-failure');
       }
     } catch (error) {
       console.error('Google auth error:', error);
-      return res.redirect('http://localhost:3000/auth-failure');
+      return res.redirect('http://localhost:5000/auth-failure');
     }
   }
 }
