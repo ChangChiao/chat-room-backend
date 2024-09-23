@@ -24,10 +24,10 @@ export class AuthService {
         username: email,
       });
     }
-    return this.login(user);
+    return user;
   }
 
-  async login(user: any) {
+  async generateJwtToken(user: any) {
     const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
