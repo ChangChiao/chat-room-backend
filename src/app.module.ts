@@ -26,8 +26,9 @@ import { AuthModule } from './auth/auth.module';
       inject: [ConfigService],
     }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthModule, WebsocketGateway],
+  providers: [AppService, UsersModule, AuthModule, WebsocketGateway],
 })
 export class AppModule {}
