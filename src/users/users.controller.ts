@@ -9,18 +9,22 @@ import {
   HttpStatus,
   ConflictException,
   HttpException,
+  UseGuards,
 } from '@nestjs/common';
 import { User } from 'src/schema/user.entity';
 import { UsersService } from './users.service';
 import { UserPayload } from 'src/model';
 import { CreateUserDto } from './create-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { CurrentUser } from 'src/decorator';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UsersService) {}
 
   @Get()
-  findAll(): Promise<User[]> {
-    return this.userService.findAll();
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@CurrentUser() user: User) {
+    return user;
   }
 
   @Get(':id')
