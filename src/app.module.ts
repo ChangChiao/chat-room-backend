@@ -13,21 +13,12 @@ import { GoogleStrategy } from './auth/google.strategy';
 import { WebsocketGateway } from './websocket/websocket.gateway';
 import { UsersModule } from './users/users.module';
 import { UsersService } from './users/users.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    PassportModule,
-    JwtModule.registerAsync({
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION_TIME'),
-        },
-      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -36,13 +27,7 @@ import { UsersService } from './users/users.service';
     }),
     UsersModule,
   ],
-  controllers: [AppController, AuthController],
-  providers: [
-    AppService,
-    AuthService,
-    JwtStrategy,
-    GoogleStrategy,
-    WebsocketGateway,
-  ],
+  controllers: [AppController],
+  providers: [AppService, AuthModule, WebsocketGateway],
 })
 export class AppModule {}
