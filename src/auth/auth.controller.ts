@@ -6,9 +6,12 @@ import {
   Get,
   Req,
   Res,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +24,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
+    // ... existing code ...
     try {
       const user = await this.authService.validateGoogleUser(req.user.email);
       const token = await this.authService.generateJwtToken(user);
@@ -38,5 +42,38 @@ export class AuthController {
       console.error('Google auth error:', error);
       return res.redirect('http://localhost:5000/auth-failure');
     }
+  }
+
+  @Post('register')
+  async register(@Body() registerDto: RegisterDto) {
+    const user = await this.authService.register(registerDto);
+    return {
+      message: 'register success',
+      user: { id: user.id, email: user.email, username: user.username },
+    };
+  }
+
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res) {
+    const { user, token } = await this.authService.login(loginDto);
+
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1 * 60 * 60 * 1000, // 1hr
+    });
+
+    return {
+      message: 'login success',
+      user: { id: user.id, email: user.email, username: user.username },
+    };
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(@Res({ passthrough: true }) res) {
+    res.clearCookie('auth_token');
+    return { message: 'logout success' };
   }
 }
