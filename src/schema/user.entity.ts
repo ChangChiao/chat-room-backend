@@ -36,6 +36,12 @@ export class User {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Timestamp;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  avatarUrl: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt: Timestamp;
+
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
 
