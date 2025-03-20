@@ -18,7 +18,6 @@ export class AuthService {
   ) {}
 
   async validateGoogleUser(email: string) {
-    // ... existing code ...
     let user = await this.userService.findByEmail(email);
     if (!user) {
       user = await this.userService.createUser({
