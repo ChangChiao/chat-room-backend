@@ -18,12 +18,15 @@ export class Room {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+  @Column({ type: 'boolean', default: false })
+  isGroupChat: boolean;
+
+  @Column({ type: 'int', nullable: true })
+  maxMembers: number;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Timestamp;
 
-  @ManyToMany(() => User, (user) => user.rooms)
-  roomMembers: User[];
-
-  @OneToMany(() => Message, (message) => message.room)
-  messages: Message[];
+  @ManyToOne(() => User)
+  creator: User;
 }

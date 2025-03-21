@@ -13,15 +13,18 @@ export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Room, (room) => room.messages)
-  room: Room;
-
-  @ManyToOne(() => User, (user) => user.messages)
-  user: User;
-
   @Column({ type: 'text' })
   content: string;
 
+  @Column({ type: 'varchar', length: 50 })
+  messageType: string; // text, image, video, audio, file
+
+  @Column({ type: 'boolean', default: false })
+  isRead: boolean;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Timestamp;
+
+  @ManyToOne(() => Room, (room) => room.messages)
+  room: Room;
 }
