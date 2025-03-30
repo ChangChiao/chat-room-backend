@@ -17,6 +17,11 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Get('info')
+  getUserInfo() {
+    return { message: 'User info endpoint' };
+  }
+
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {}
@@ -34,7 +39,7 @@ export class AuthController {
         maxAge: 1 * 60 * 60 * 1000, //  1hr
       });
       if (user) {
-        return res.redirect('http://localhost:5000/chat-list');
+        return res.redirect('http://localhost:5000/chat');
       } else {
         return res.redirect('http://localhost:5000/auth-failure');
       }
@@ -61,7 +66,13 @@ export class AuthController {
     res.cookie('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 1 * 60 * 60 * 1000, // 1hr
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/',
+      domain:
+        process.env.NODE_ENV === 'production'
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
     });
 
     return {
