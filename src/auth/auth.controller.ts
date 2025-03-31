@@ -17,11 +17,6 @@ import { LoginDto } from './dto/login.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get('info')
-  getUserInfo() {
-    return { message: 'User info endpoint' };
-  }
-
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {}
@@ -54,7 +49,7 @@ export class AuthController {
     const user = await this.authService.register(registerDto);
     return {
       message: 'register success',
-      user: { id: user.id, email: user.email, username: user.username },
+      user: { id: user.id, email: user.email, userName: user.userName },
     };
   }
 

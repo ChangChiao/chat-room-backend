@@ -1,7 +1,6 @@
 export interface UserPayload {
-  username: string;
+  userName: string;
   password: string;
-  confirmPassword: string;
   email: string;
 }
 
