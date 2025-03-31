@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/schema/user.entity';
 import { Repository } from 'typeorm';
-import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './create-user.dto';
 import { validate } from 'class-validator';
 import { GoogleUserPayload } from 'src/model';
@@ -41,14 +41,13 @@ export class UsersService {
   async create(payload: CreateUserDto): Promise<any> {
     const { username, password, confirmPassword, email } = payload;
 
-    const salt = this.generateSalt();
-    const hashedPassword = this.hashPassword(password, salt);
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
     const UserPayload = {
       username: payload.username,
       email: payload.email,
       password: hashedPassword,
       createdAt: new Date(),
-      salt,
     };
     payload.password = hashedPassword;
     return this.createUser(UserPayload);
@@ -67,15 +66,5 @@ export class UsersService {
       console.log('error', error);
       throw new InternalServerErrorException('server error');
     }
-  }
-
-  private generateSalt(): string {
-    return crypto.randomBytes(16).toString('hex');
-  }
-
-  private hashPassword(password: string, salt: string): string {
-    const hash = crypto.createHmac('sha256', salt);
-    hash.update(password);
-    return hash.digest('hex');
   }
 }

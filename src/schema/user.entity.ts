@@ -30,9 +30,6 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true, nullable: true })
   googleEmail: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  salt: string;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Timestamp;
 
@@ -42,10 +39,10 @@ export class User {
   @Column({ type: 'timestamp', nullable: true })
   lastLoginAt: Timestamp;
 
-  @OneToMany(() => Message, (message) => message.user)
-  messages: Message[];
+  // @OneToMany(() => Message, (message) => message.user)
+  // messages: Message[];
 
-  @ManyToMany(() => Room, (room) => room.roomMembers)
-  @JoinTable()
-  rooms: Room[];
+  // @ManyToMany(() => Room, (room) => room.roomMembers)
+  // @JoinTable()
+  // rooms: Room[];
 }
