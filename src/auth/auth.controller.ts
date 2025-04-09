@@ -7,6 +7,9 @@ import {
   Req,
   Res,
   HttpCode,
+  ConflictException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -45,12 +48,26 @@ export class AuthController {
   }
 
   @Post('register')
+  @HttpCode(201)
   async register(@Body() registerDto: RegisterDto) {
-    const user = await this.authService.register(registerDto);
-    return {
-      message: 'register success',
-      user: { id: user.id, email: user.email, userName: user.userName },
-    };
+    try {
+      const user = await this.authService.register(registerDto);
+      return {
+        code: 201,
+        message: 'register success',
+        user: { id: user.id, email: user.email, userName: user.userName },
+      };
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new HttpException(
+          {
+            code: 409,
+            message: 'email already exists',
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+    }
   }
 
   @Post('login')

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -38,7 +39,7 @@ export class AuthService {
 
     const existingUser = await this.userService.findByEmail(email);
     if (existingUser) {
-      throw new BadRequestException('用户已存在');
+      throw new ConflictException('email already exists');
     }
 
     // encrypt password

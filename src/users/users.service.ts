@@ -38,21 +38,6 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  async create(payload: CreateUserDto): Promise<any> {
-    const { password, userName, email } = payload;
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const UserPayload = {
-      username: userName,
-      email: email,
-      password: hashedPassword,
-      createdAt: new Date(),
-    };
-    payload.password = hashedPassword;
-    return this.createUser(UserPayload);
-  }
-
   async createUser(payload: any): Promise<any> {
     const { email } = payload;
     const existEmail = await this.usersRepository.findOneBy({ email });
