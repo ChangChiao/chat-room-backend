@@ -25,6 +25,6 @@ export class Message {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Timestamp;
 
-  @ManyToOne(() => Room, (room) => room.messages)
+  @ManyToOne(() => Room)
   room: Room;
 }

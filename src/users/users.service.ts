@@ -30,8 +30,8 @@ export class UsersService {
     return this.usersRepository.findOneBy({ email });
   }
 
-  findByUsername(username: string): Promise<User> {
-    return this.usersRepository.findOneBy({ username });
+  findByUsername(userName: string): Promise<User> {
+    return this.usersRepository.findOneBy({ userName });
   }
 
   async remove(id: number): Promise<void> {
@@ -39,13 +39,13 @@ export class UsersService {
   }
 
   async create(payload: CreateUserDto): Promise<any> {
-    const { username, password, confirmPassword, email } = payload;
+    const { password, userName, email } = payload;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     const UserPayload = {
-      username: payload.username,
-      email: payload.email,
+      username: userName,
+      email: email,
       password: hashedPassword,
       createdAt: new Date(),
     };

@@ -72,7 +72,7 @@ export class AuthController {
 
     return {
       message: 'login success',
-      user: { id: user.id, email: user.email, username: user.username },
+      user: { id: user.id, email: user.email, username: user.userName },
     };
   }
 
