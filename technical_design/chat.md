@@ -1,107 +1,103 @@
-# 聊天室後端系統技術設計文檔
+# 即時聊天室系統技術規格
 
-## 1. 系統概述
-
-本系統是一個基於 NestJS 框架開發的實時聊天應用後端，提供用戶註冊/登入、聊天室創建/管理以及即時消息傳遞功能。系統採用模塊化設計，支持 RESTful API 和 WebSocket 通信。
-
-## 2. 技術線
-
-- **後端框架**：NestJS (Node.js)
-- **DB**：PostgreSQL (通過 TypeORM 連接)
-- **身份驗證**：JWT (JSON Web Token)、Google OAuth2.0
-- **即時通訊**：Socket.IO (WebSocket)
-- **快取**：Redis
-
-## 3. 系統架構
-
-### 3.1 模組結構
-
-- **AppModule**：應用程序的根模塊，負責連接所有子模塊
-- **AuthModule**：處理用戶身份驗證和授權
-- **UsersModule**：管理用戶相關操作
-- **ChatModule**：管理聊天室和消息
-- **WebSocketModule**：處理實時通信
-- **RedisModule**：提供緩存服務
-
-### 3.2 架構圖
+## 架構總覽
 
 ```
-+-------------+      +-------------+      +-------------+
-|  Client App  | <--> |   RESTful   | <--> |  Controller |
-|  (前端應用)  |      |     API     |      |   (控制器)  |
-+-------------+      +-------------+      +------+------+
-       ^                                         |
-       |                                         |
-       v                                         v
-+-------------+      +-------------+      +-------------+
-|  WebSocket  | <--> |  Gateway    | <--> |   Service   |
-|   (Socket.IO)|      | (WebSocket) |      |  (服務層)   |
-+-------------+      +-------------+      +------+------+
-                                                 |
-                                                 |
-                                                 v
-                                          +------+------+
-                                          |   Entity    |
-                                          |  (數據實體)  |
-                                          +------+------+
-                                                 |
-                                                 |
-                                                 v
-                                          +------+------+
-                                          |  Database   |
-                                          | (PostgreSQL) |
-                                          +-------------+
+┌──────────────┐
+│ Client SPA │ (Vue / React / …，Web & Mobile)
+└──────┬───────┘
+        │ WebSocket (wss://chat.example.com)
+┌──────▼───────────────────────────┐
+│ Load Balancer (L7 / Sticky) │ ← SSL Termination
+└──────┬───────────────────────────┘
+        │ (Round‑Robin / IP‑Hash)
+┌──────▼─────────┐     ┌───────────▼──────┐
+│ Chat Node #1 │     │ Chat Node #N │
+│ (NestJS / WS) │  …  │ (NestJS / WS) │
+└──────┬─────────┘     └───────────┬──────┘
+        │ Redis Pub‑Sub (Typing／Msg Fan‑out)
+┌──────▼─────────────────────────────────┐
+│ Redis Cluster (Cache & Session Store) │
+└────────────────────────────────────────┘
+┌────────────────────────────────────────┐
+│ RDB (PostgreSQL) — User / Message DB │
+└────────────────────────────────────────┘
 ```
 
-## 7. 緩存策略
+---
 
-系統使用 Redis 進行以下資料的緩存：
+## 元件與技術選型
 
-1. **用戶會話信息**：存儲用戶的在線狀態和會話數據
-2. **聊天室成員列表**：快速訪問聊天室成員信息
-3. **最近消息**：緩存聊天室的最近消息，減少數據庫查詢
+| 元件       | 技術選型                      | 主要職責                                                        |
+| ---------- | ----------------------------- | --------------------------------------------------------------- |
+| 負載均衡器 | Nginx Stream / AWS ALB        | WebSocket L7 代理、TLS 終止、Sticky Session (IP Hash 或 Cookie) |
+| Chat Node  | Node.js 18 + NestJS WebSocket | 連線管理、ACL、訊息轉發、心跳、輸入中 broadcast                 |
+| Redis      | Redis 7 (Cluster mode)        | Pub‑Sub、快取、Session & Typing 狀態、單一登入鎖                |
+| RDBMS      | PostgreSQL 15                 | 永久訊息、使用者資料、群組資料                                  |
+| 物件儲存   | S3 / MinIO                    | 圖片上傳與 CDN 傳遞                                             |
+| 認證服務   | Auth Service (NestJS)         | Email / Google OAuth、JWT 發行、Refresh Token                   |
 
-Redis 緩存結構：
+---
 
-- **用戶在線狀態**：`online:users` (Set)
-- **用戶-會話映射**：`user:{userId}:session` (Hash)
-- **聊天室成員**：`room:{roomId}:members` (Set)
-- **最近消息**：`room:{roomId}:messages` (Sorted Set)
+## 主要功能設計
 
-## 8. 安全考慮
+### 4.1 訊息流程
 
-1. **認證與授權**：
+- Client 送出 `MESSAGE` Frame → Chat Node
+- Chat Node 驗證 JWT → 發佈至 Redis Pub-Sub `<roomId>` channel
+- 所有節點接收後向各自的 Client 廣播
+- 永久訊息由 async worker 寫入 PostgreSQL
+- 圖片訊息：Client 先直傳物件儲存，取得 URL 後以文字訊息發送
 
-   - 使用 JWT 進行 API 認證
-   - 實現基於角色的訪問控制
-   - 支持 Google OAuth2.0 第三方登入
+### 4.2 Typing Indicator
 
-2. **數據安全**：
+- Client 每 800ms 鍵入則送 `TYPING_START`
+- 無輸入 1s 送 `TYPING_STOP`
+- Chat Node 經由 Redis 轉發狀態給同房間其他 Client 顯示「輸入中…」
 
-   - 密碼使用 bcrypt 進行加密存儲
-   - 實現 CSRF 保護
-   - 設置適當的 CORS 策略
+### 4.3 單一登入控制
 
-3. **WebSocket 安全**：
-   - 每個 WebSocket 連接需要進行身份驗證
-   - 實現訊息簽名和驗證機制
-   - 防止未授權的房間訪問
+- 登入成功時產生 `sessionId`：
 
-## 9. 擴展性考慮
+  ```
+  SETNX user:{uid}:session {sessionId} EX 86400
+  ```
 
-1. **水平擴展**：
+- 若第二次登入導致 SETNX 失敗 → 發送 `FORCE_LOGOUT` Frame 並中斷原連線
+- 登出或閒置逾時時刪除 Redis Key
 
-   - 使用 Redis 作為 Socket.IO 適配器，支持多實例部署
-   - 設計無狀態 API 服務，便於負載均衡
+### 4.4 心跳與閒置踢出
 
-2. **監控與日誌**：
+- Client：每 30 秒送 ping；Server 回 pong
+- Server：紀錄 `lastActivity`，若超過 5 分鐘無任何事件 → 主動關閉 (Code: 4408 Idle Timeout)
+- 踢出後需重新驗證 JWT / Refresh Token
 
-   - 實現請求日誌中間件
-   - 集成錯誤跟踪
-   - 性能監控
+---
 
-3. **未來功能擴展**：
-   - 支持圖片、視頻和文件傳輸
-   - 端到端加密
-   - 消息回應與引用功能
-   - 用戶在線狀態實時更新
+## 安全性與最佳實務
+
+- **JWT 使用 RS256**：放於 `Authorization: Bearer`
+- **Refresh Token**：以 `HttpOnly Cookie` 儲存
+- **圖片上傳限制**：5 MB 以下，MIME 類型限制 (image/png, image/jpeg, image/webp)
+- **WebSocket 傳輸加密**：
+
+  - 使用 `wss://`
+  - 強制 TLS 1.3
+  - 禁用弱式 Cipher Suite
+
+- **Redis 安全強化**：
+
+  - 啟用 `in-transit encryption`
+  - 設定 ACL 角色限制（websocket 角色）
+
+- **依賴掃描工具**：
+
+  - GitHub Dependabot
+  - Snyk
+
+---
+
+## 備註
+
+- 本設計支持一對一與群組聊天室
+- 適用於 SPA 架構之 Web & Mobile App
