@@ -17,7 +17,7 @@ export class WebsocketGateway
 
   @WebSocketServer() server: Server;
 
-  afterInit(server: Server) {
+  afterInit(_server: Server) {
     console.log('WebSocket Gateway initialized');
   }
 

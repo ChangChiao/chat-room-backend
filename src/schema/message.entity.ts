@@ -6,7 +6,6 @@ import {
   Timestamp,
 } from 'typeorm';
 import { Room } from './room.entity';
-import { User } from './user.entity';
 
 @Entity()
 export class Message {

@@ -4,12 +4,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/schema/user.entity';
+import { User } from '../schema/user.entity';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './create-user.dto';
-import { validate } from 'class-validator';
-import { GoogleUserPayload } from 'src/model';
 
 @Injectable()
 export class UsersService {
@@ -38,7 +34,7 @@ export class UsersService {
     await this.usersRepository.delete(id);
   }
 
-  async createUser(payload: any): Promise<any> {
+  async createUser(payload: Partial<User>): Promise<User> {
     const { email } = payload;
     const existEmail = await this.usersRepository.findOneBy({ email });
     if (existEmail) {

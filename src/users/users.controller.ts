@@ -1,22 +1,17 @@
 import {
   Controller,
   Get,
-  Post,
   Delete,
   Param,
-  Body,
-  HttpCode,
   HttpStatus,
-  ConflictException,
   HttpException,
   UseGuards,
 } from '@nestjs/common';
-import { User } from 'src/schema/user.entity';
+import { User } from '../schema/user.entity';
 import { UsersService } from './users.service';
-import { UserPayload } from 'src/model';
-import { CreateUserDto } from './create-user.dto';
+
 import { AuthGuard } from '@nestjs/passport';
-import { CurrentUser } from 'src/decorator';
+import { CurrentUser } from '../decorator';
 
 @Controller('users')
 export class UserController {

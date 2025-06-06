@@ -3,12 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
   Timestamp,
-  ManyToMany,
 } from 'typeorm';
 import { User } from './user.entity';
-import { Message } from './message.entity';
 
 @Entity()
 export class Room {
