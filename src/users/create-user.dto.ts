@@ -1,4 +1,3 @@
-import { Req } from '@nestjs/common';
 import { IsString, IsEmail, MinLength, IsNotEmpty } from 'class-validator';
 
 export class CreateUserDto {

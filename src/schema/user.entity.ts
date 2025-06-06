@@ -1,14 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  Timestamp,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
-import { Message } from './message.entity';
-import { Room } from './room.entity';
+import { Entity, Column, PrimaryGeneratedColumn, Timestamp } from 'typeorm';
 
 @Entity()
 export class User {
